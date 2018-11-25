@@ -1,0 +1,3 @@
+crypto==1.4.1
+pycrypto==2.6.1
+PySide==1.2.4
