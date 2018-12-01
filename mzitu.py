@@ -1,5 +1,5 @@
 # coding=utf-8
-import urllib2
+import requests
 from bs4 import BeautifulSoup
 import re
 import os
@@ -14,8 +14,8 @@ sys.setdefaultencoding('utf8')
 
 def get_theme_urls(page):
     theme_urls = []
-    resp = urllib2.urlopen("http://www.mzitu.com/page/"+str(page))
-    html = resp.read()
+    resp = requests.get("https://www.mzitu.com/page/"+str(page)+'/')
+    html = resp.text
     soup = BeautifulSoup(html, "lxml")
     lis = soup.find('ul', {'id': 'pins'}).find_all('li')
     for li in lis:
@@ -24,8 +24,8 @@ def get_theme_urls(page):
 
 
 def get_theme_maxpage(theme_url):
-    resp = urllib2.urlopen(theme_url)
-    html = resp.read()
+    resp = requests.get(theme_url)
+    html = resp.text
     soup = BeautifulSoup(html, "lxml")
     max_page = soup.find('div', {'class': 'pagenavi'}).find_all(
         'a')[-2].find('span').get_text()
@@ -33,8 +33,8 @@ def get_theme_maxpage(theme_url):
 
 
 def get_img_url(page_url):
-    resp = urllib2.urlopen(page_url)
-    html = resp.read()
+    resp = requests.get(page_url)
+    html = resp.text
     soup = BeautifulSoup(html, "lxml")
     img_url = soup.find('div', {'class': 'main-image'}
                         ).find('p').find('a').find('img')['src']
@@ -50,8 +50,8 @@ def get_img_urls(theme_url):
 
 
 def get_theme_title(theme_url):
-    resp = urllib2.urlopen(theme_url)
-    html = resp.read()
+    resp = requests.get(theme_url)
+    html = resp.text
     soup = BeautifulSoup(html, "lxml")
     theme_title = soup.find('h2', {'class': 'main-title'}).get_text()
     RemoveSign = re.compile(r'[\/:*?"<>|"]')
@@ -77,23 +77,22 @@ def download_imgs(theme_url):
         socket.setdefaulttimeout(10)
         headers = {
             "Host": "i.meizitu.net",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0",
+            "User-Agent": "",
             "Accept": "*/*",
             "Accept-Language": "zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
             "Accept-Encoding": "gzip, deflate",
             "Referer": "http://www.mzitu.com",
-            "DNT": 1,
+            "DNT": "1",
             "Connection": "keep-alive"
         }
-        try:
-            req = urllib2.Request(img_url, headers=headers)
-            resp = urllib2.urlopen(req)
-            data = resp.read()
-            f = open(img_name, 'wb+')
-            f.write(data)
-            f.close()
-        except:
-            print('下载'+img_name+'失败')
+        #try:
+        req = requests.get(img_url, headers=headers)
+        data = req.content
+        f = open(img_name, 'wb+')
+        f.write(data)
+        f.close()
+        #except:
+            #print('下载'+img_name+'失败')
     print('下载完成: '+'-------'+title+'-------')
 
 
